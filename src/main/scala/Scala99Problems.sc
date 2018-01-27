@@ -196,7 +196,10 @@ def reverseRecursive[A](ls: List[A]): List[A] = ls match {
 def reverseTailRecursive[A](ls: List[A]): List[A] = {
   def reverseR(result: List[A], curList: List[A]): List[A] = curList match {
     case Nil => result
-    case h :: tail => reverseR(h :: result, tail)
+    case h :: tail =>
+      //println(s"h: $h, tail: $tail, result: $result, currentlist: $curList h::result: ${h::result}")
+      reverseR(h :: result, tail)
+
   }
 
   reverseR(Nil, ls)
@@ -209,3 +212,58 @@ def reverseFunctional[A](ls: List[A]): List[A] =
   ls.foldLeft(List[A]()) { (r, h) => h :: r }
 
 reverseFunctional(List(1, 1, 2, 3, 5, 8))
+
+
+//// P06(*) Find out whether a list is a palindrome.
+//My approach
+def isPalindrome[A](ls: List[A]) : Boolean = {
+  ls.equals(ls.reverse)
+}
+
+isPalindrome(List(1, 1, 2, 3, 5, 8))
+isPalindrome(List(1, 6, 2, 3, 2, 6, 1))
+
+//Suggested
+// In theory, we could be slightly more efficient than this. This approach
+// traverses the list twice: once to reverse it, and once to check equality.
+// Technically, we only need to check the first half of the list for equality
+// with the first half of the reversed list. The code to do that more
+// efficiently than this implementation is much more complicated, so we'll
+// leave things with this clear and concise implementation.
+def isPalindrome1[A](ls: List[A]): Boolean = ls == ls.reverse
+
+//My approach 2
+def isPalindrome2[A] (ls: List[A]) : Boolean = {
+  if (ls.isEmpty || ls.length == 1) {
+    true
+  }
+
+  val halfIndex = ls.length / 2 - 1
+  val secondHalfStartIndex = if (ls.length % 2 == 0) halfIndex + 1 else halfIndex + 2;
+
+  @tailrec
+  def check(forwardIndex: Int, backwardIndex: Int): Boolean = {
+    if (forwardIndex <= halfIndex && backwardIndex >= secondHalfStartIndex) {
+      if (ls(forwardIndex) == ls(backwardIndex)) {
+        check(forwardIndex + 1, backwardIndex - 1)
+      } else {
+        false
+      }
+    } else {
+      true
+    }
+  }
+  check(0, ls.length - 1)
+}
+
+isPalindrome2(List(1, 1, 2, 3, 5, 8))
+isPalindrome2(List(1, 6, 2, 3, 2, 6, 1))
+isPalindrome2(List(1, 6, 2, 2, 6, 1))
+isPalindrome2(List(1, 2, 2, 1))
+isPalindrome2(List(1, 1))
+isPalindrome2(List(1))
+isPalindrome2(List())
+
+
+
+
