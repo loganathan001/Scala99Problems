@@ -96,8 +96,116 @@ lastNthRecursive(1, List(1, 1, 2, 3, 5, 8))
 
 
 
-//// P03 (*) Find the Kth element of a list.
+//// P03 (*) Find the Kth element of a list. By convent
+// on, the first element in the list is element 0.
 //Builtin
 List(1, 1, 2, 3, 5, 8)(2)
 
 // My Approach
+@tailrec
+def nthElem[A](ls: List[A], n: Int) : A =  n match {
+    case n if n < 0 || n >= ls.size => throw new IllegalArgumentException
+    case 0 => ls.head
+    case _ => nthElem(ls.tail, n-1)
+}
+
+nthElem(List(1, 1, 2, 3, 5, 8), 2)
+nthElem(List(1, 1, 2, 3, 5, 8), 3)
+nthElem(List(1, 1, 2, 3, 5, 8), 0)
+nthElem(List(1, 1, 2, 3, 5, 8), 5)
+
+
+//Suggested non-builtin
+def nthRecursive[A](n: Int, ls: List[A]): A = (n, ls) match {
+  case (0, h :: _) => h
+  case (n, _ :: tail) => nthRecursive(n - 1, tail)
+  case (_, Nil) => throw new NoSuchElementException
+}
+
+//// P04 (*) Find the number of elements of a list.
+//Builtin
+List(1, 1, 2, 3, 5, 8).length
+
+// My Approach
+def listSize[A](ls: List[A]) : Int = {
+  @tailrec
+  def internalListSize[A](n: Int, ls: List[A]) : Int = ls match {
+    case Nil => n
+    case _::tail => internalListSize(n + 1, tail)
+  }
+  internalListSize(0, ls)
+}
+
+listSize(List(1, 1, 2, 3, 5, 8))
+listSize(List(1))
+listSize(List())
+
+// Suggested
+// Simple recursive solution.
+def lengthRecursive[A](ls: List[A]): Int = ls match {
+  case Nil => 0
+  case _ :: tail => 1 + lengthRecursive(tail)
+}
+
+// Tail recursive solution. Theoretically more efficient; with tail-call
+// elimination in the compiler, this would run in constant space.
+// Unfortunately, the JVM doesn't do tail-call elimination in the general
+// case. Scala *will* do it if the method is either final or is a local
+// function. In this case, `lengthR` is a local function, so it should
+// be properly optimized.
+// For more information, see
+// http://blog.richdougherty.com/2009/04/tail-calls-tailrec-and-trampolines.html
+def lengthTailRecursive[A](ls: List[A]): Int = {
+  def lengthR(result: Int, curList: List[A]): Int = curList match {
+    case Nil => result
+    case _ :: tail => lengthR(result + 1, tail)
+  }
+
+  lengthR(0, ls)
+}
+// More pure functional solution, with folds.
+def lengthFunctional[A](ls: List[A]): Int = ls.foldLeft(0) { (c, _) => c + 1 }
+
+lengthFunctional(List(1, 1, 2, 3, 5, 8))
+
+//// P05 (*) Reverse a list.
+//Builtin
+List(1, 1, 2, 3, 5, 8).reverse
+
+// My Approach
+def reverseList[A](ls: List[A]): List[A] = {
+  @tailrec
+  def reverseListR[A](result: List[A], ls: List[A]): List[A] = ls match {
+    case Nil => result
+    case _ =>  reverseListR(result:+ls.last, ls.init)
+  }
+
+  reverseListR(Nil, ls)
+}
+
+reverseList(List(1, 1, 2, 3, 5, 8))
+
+// Suggested
+// Simple recursive. O(n^2)
+def reverseRecursive[A](ls: List[A]): List[A] = ls match {
+  case Nil => Nil
+  case h :: tail => reverseRecursive(tail) ::: List(h)
+}
+
+// Tail recursive.
+def reverseTailRecursive[A](ls: List[A]): List[A] = {
+  def reverseR(result: List[A], curList: List[A]): List[A] = curList match {
+    case Nil => result
+    case h :: tail => reverseR(h :: result, tail)
+  }
+
+  reverseR(Nil, ls)
+}
+reverseTailRecursive(List(1, 1, 2, 3, 5, 8))
+
+
+// Pure functional
+def reverseFunctional[A](ls: List[A]): List[A] =
+  ls.foldLeft(List[A]()) { (r, h) => h :: r }
+
+reverseFunctional(List(1, 1, 2, 3, 5, 8))
